@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../statistics/presentation/statistics_screen.dart';
 
 import '../../transactions/data/mock_transactions.dart';
 import '../../transactions/domain/transaction_entry.dart';
@@ -30,7 +31,29 @@ class DashboardScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Dashboard', style: Theme.of(context).textTheme.headlineSmall),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Dashboard',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(title: Text('Phan tich')),
+                        body: StatisticsScreen(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.bar_chart),
+                label: const Text('Phan tich'),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Card(
             child: Padding(
@@ -38,20 +61,29 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Tong quan tai chinh',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Tong quan tai chinh',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 12),
-                  Text('Tong thu: ${currencyFormat.format(income)}',
-                      style: const TextStyle(color: Colors.green)),
+                  Text(
+                    'Tong thu: ${currencyFormat.format(income)}',
+                    style: const TextStyle(color: Colors.green),
+                  ),
                   const SizedBox(height: 6),
-                  Text('Tong chi: ${currencyFormat.format(expense)}',
-                      style: const TextStyle(color: Colors.red)),
+                  Text(
+                    'Tong chi: ${currencyFormat.format(expense)}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          Text('Giao dich gan day', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Giao dich gan day',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           ...recent.take(6).map((entry) {
             final isIncome = entry.type == TransactionType.income;
@@ -60,7 +92,8 @@ class DashboardScreen extends StatelessWidget {
               child: ListTile(
                 title: Text(entry.title),
                 subtitle: Text(
-                    '${entry.category} • ${DateFormat('dd/MM/yyyy').format(entry.date)}'),
+                  '${entry.category} • ${DateFormat('dd/MM/yyyy').format(entry.date)}',
+                ),
                 trailing: Text(
                   '${isIncome ? '+' : '-'}${currencyFormat.format(entry.amount)}',
                   style: TextStyle(
