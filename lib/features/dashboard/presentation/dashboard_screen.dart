@@ -27,13 +27,14 @@ class DashboardScreen extends StatelessWidget {
     final expense = transactions
         .where((tx) => tx.type == TransactionType.expense)
         .fold<double>(0, (sum, tx) => sum + tx.amount);
-    
+
     final balance = income - expense;
+    final recent = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
 
     return SafeArea(
-      child: isLoading 
+      child: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : transactions.isEmpty 
+        : transactions.isEmpty
               ? const Center(child: Text("Empty Wallet", style: TextStyle(fontSize: 18, color: Colors.grey)))
               : ListView(
                   padding: const EdgeInsets.all(16),
@@ -83,13 +84,13 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     Text('Giao dịch gần đây', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    ...transactions.take(5).map((entry) {
+                    ...recent.take(5).map((entry) {
                       final isIncome = entry.type == TransactionType.income;
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: isIncome ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                            backgroundColor: isIncome ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                             child: Icon(
                               isIncome ? Icons.arrow_downward : Icons.arrow_upward,
                               color: isIncome ? Colors.green : Colors.red,
