@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../transactions/presentation/transaction_entry_screen.dart';
+
 class RootShell extends StatelessWidget {
   const RootShell({
     super.key,
@@ -13,6 +15,17 @@ class RootShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TransactionEntryScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {

@@ -1,8 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import '../../transactions/data/mock_transactions.dart';
+import '../../transactions/data/transaction_provider.dart';
 import '../../transactions/domain/transaction_entry.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -28,7 +29,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       return DateTime(now.year, now.month - index);
     });
 
-    final filtered = mockTransactions.where((tx) {
+    final provider = context.watch<TransactionProvider>();
+    final transactions = provider.transactions;
+
+    final filtered = transactions.where((tx) {
       return tx.date.year == _selectedMonth.year &&
           tx.date.month == _selectedMonth.month;
     }).toList()
@@ -68,7 +72,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Thong ke', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Thống kê', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
           DropdownButtonFormField<DateTime>(
             initialValue: _selectedMonth,
@@ -92,7 +96,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SizedBox(
                 height: 240,
                 child: days.isEmpty
-                    ? const Center(child: Text('Khong co du lieu trong thang nay'))
+                    ? const Center(child: Text('Không có dữ liệu trong tháng này'))
                     : BarChart(
                         BarChartData(
                           gridData: const FlGridData(drawVerticalLine: false),
@@ -114,7 +118,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SizedBox(
                 height: 240,
                 child: days.isEmpty
-                    ? const Center(child: Text('Khong co du lieu chi tieu trong thang nay'))
+                    ? const Center(child: Text('Không có dữ liệu chi tiêu trong tháng này'))
                     : LineChart(
                         LineChartData(
                           gridData: const FlGridData(drawVerticalLine: false),
