@@ -1,51 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../dashboard/presentation/dashboard_screen.dart';
-import '../../statistics/presentation/statistics_screen.dart';
-import '../../transactions/presentation/transactions_screen.dart';
+class RootShell extends StatelessWidget {
+  const RootShell({
+    super.key,
+    required this.navigationShell,
+  });
 
-class RootShell extends StatefulWidget {
-  const RootShell({super.key});
-
-  @override
-  State<RootShell> createState() => _RootShellState();
-}
-
-class _RootShellState extends State<RootShell> {
-  int _currentIndex = 0;
-
-  late final List<Widget> _screens = const [
-    DashboardScreen(),
-    TransactionsScreen(),
-    StatisticsScreen(),
-  ];
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
+        selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
         },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.space_dashboard_outlined),
             selectedIcon: Icon(Icons.space_dashboard_rounded),
-            label: 'Tong quan',
+            label: 'Tổng quan',
           ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),
-            label: 'Giao dich',
+            label: 'Giao dịch',
           ),
           NavigationDestination(
             icon: Icon(Icons.query_stats_outlined),
             selectedIcon: Icon(Icons.query_stats),
-            label: 'Thong ke',
+            label: 'Thống kê',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Cá nhân',
           ),
         ],
       ),
