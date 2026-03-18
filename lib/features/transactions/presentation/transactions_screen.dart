@@ -34,65 +34,71 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ..sort((a, b) => b.date.compareTo(a.date));
 
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            pinned: true,
-            title: const Text('Giao dich'),
-          ),
-          SliverToBoxAdapter(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('Giao dich', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
+              child: Row(
                 children: [
-                  _TotalsCard(
-                    income: currencyFormat.format(income),
-                    expense: currencyFormat.format(expense),
-                  ),
-                  const SizedBox(height: 16),
-                  SegmentedButton<TransactionFilter>(
-                    showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(
-                        value: TransactionFilter.all,
-                        label: Text('Tat ca'),
-                        icon: Icon(Icons.layers_outlined),
-                      ),
-                      ButtonSegment(
-                        value: TransactionFilter.income,
-                        label: Text('Tien vao'),
-                        icon: Icon(Icons.south_west),
-                      ),
-                      ButtonSegment(
-                        value: TransactionFilter.expense,
-                        label: Text('Tien ra'),
-                        icon: Icon(Icons.north_east),
-                      ),
-                    ],
-                    selected: {_filter},
-                    onSelectionChanged: (selection) {
-                      setState(() {
-                        _filter = selection.first;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  if (filtered.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 48),
-                      child: Text('Chua co giao dich trong bo loc nay.'),
-                    )
-                  else
-                    ...filtered.map(
-                      (entry) => _TransactionCard(
-                        entry: entry,
-                        currencyFormat: currencyFormat,
-                      ),
+                  Expanded(
+                    child: Text(
+                      'Tong thu\n${currencyFormat.format(income)}',
+                      style: const TextStyle(color: Colors.green),
                     ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Tong chi\n${currencyFormat.format(expense)}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          SegmentedButton<TransactionFilter>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(value: TransactionFilter.all, label: Text('Tat ca')),
+              ButtonSegment(value: TransactionFilter.income, label: Text('Tien vao')),
+              ButtonSegment(value: TransactionFilter.expense, label: Text('Tien ra')),
+            ],
+            selected: {_filter},
+            onSelectionChanged: (selection) {
+              setState(() => _filter = selection.first);
+            },
+          ),
+          const SizedBox(height: 12),
+          if (filtered.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Center(child: Text('Chua co giao dich trong bo loc nay.')),
+            )
+          else
+            ...filtered.map((entry) {
+              final isIncome = entry.type == TransactionType.income;
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  title: Text(entry.title),
+                  subtitle: Text(
+                    '${entry.category} • ${DateFormat('dd/MM/yyyy').format(entry.date)}',
+                  ),
+                  trailing: Text(
+                    '${isIncome ? '+' : '-'}${currencyFormat.format(entry.amount)}',
+                    style: TextStyle(
+                      color: isIncome ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -106,13 +112,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       case TransactionFilter.all:
         return [...source];
       case TransactionFilter.income:
-        return source
-            .where((entry) => entry.type == TransactionType.income)
-            .toList();
+        return source.where((entry) => entry.type == TransactionType.income).toList();
       case TransactionFilter.expense:
-        return source
-            .where((entry) => entry.type == TransactionType.expense)
-            .toList();
+        return source.where((entry) => entry.type == TransactionType.expense).toList();
     }
   }
 }
@@ -121,103 +123,4 @@ enum TransactionFilter {
   all,
   income,
   expense,
-}
-
-class _TotalsCard extends StatelessWidget {
-  const _TotalsCard({
-    required this.income,
-    required this.expense,
-  });
-
-  final String income;
-  final String expense;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: _Value(label: 'Tong thu', value: income, color: Colors.green),
-            ),
-            Container(
-              width: 1,
-              height: 50,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            Expanded(
-              child: _Value(label: 'Tong chi', value: expense, color: Colors.red),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Value extends StatelessWidget {
-  const _Value({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TransactionCard extends StatelessWidget {
-  const _TransactionCard({
-    required this.entry,
-    required this.currencyFormat,
-  });
-
-  final TransactionEntry entry;
-  final NumberFormat currencyFormat;
-
-  @override
-  Widget build(BuildContext context) {
-    final isIncome = entry.type == TransactionType.income;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        title: Text(entry.title),
-        subtitle: Text(
-          '${entry.category} • ${DateFormat('dd/MM/yyyy').format(entry.date)}',
-        ),
-        trailing: Text(
-          '${isIncome ? '+' : '-'}${currencyFormat.format(entry.amount)}',
-          style: TextStyle(
-            color: isIncome ? Colors.green : Colors.red,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
 }
