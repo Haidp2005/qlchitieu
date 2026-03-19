@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase Functions
+functions/node_modules/
+functions/.env
+functions/.env.*
+
+# Cloudflare Worker
+sepay-worker/node_modules/
+sepay-worker/.dev.vars
+
+# Local app environment
+.env.supabase

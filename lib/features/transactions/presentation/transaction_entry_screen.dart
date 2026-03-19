@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/transaction_provider.dart';
+import '../domain/transaction_categories.dart';
 import '../domain/transaction_entry.dart';
 
 class TransactionEntryScreen extends StatefulWidget {
@@ -19,9 +20,6 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> {
   final TextEditingController _titleController = TextEditingController();
   TransactionType _selectedType = TransactionType.expense;
   String? _selectedCategory;
-
-  final List<String> _expenseCategories = ['An uong', 'Di chuyen', 'Nha o', 'Mua sam', 'Hoc tap', 'Khac'];
-  final List<String> _incomeCategories = ['Luong', 'Thuong', 'Dau tu', 'Ban hang', 'Khac'];
 
   @override
   void dispose() {
@@ -73,9 +71,9 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentCategories = _selectedType == TransactionType.expense 
-        ? _expenseCategories 
-        : _incomeCategories;
+    final currentCategories = _selectedType == TransactionType.expense
+      ? expenseCategories
+      : incomeCategories;
         
     // Reset category if type changes and category belongs to previous type
     if (_selectedCategory != null && !currentCategories.contains(_selectedCategory)) {
@@ -169,7 +167,7 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      cat,
+                      categoryDisplayName(cat),
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black87,

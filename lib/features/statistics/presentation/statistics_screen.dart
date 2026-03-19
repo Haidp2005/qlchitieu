@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../transactions/data/transaction_provider.dart';
+import '../../transactions/domain/transaction_categories.dart';
 import '../../transactions/domain/transaction_entry.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -97,7 +98,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   initialValue: _selectedMonth,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Thang',
+                    labelText: 'Tháng',
                   ),
                   items: List.generate(12, (i) => i + 1)
                       .map(
@@ -119,7 +120,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   initialValue: _selectedYear,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Nam',
+                    labelText: 'Năm',
                   ),
                   items: years
                       .map(
@@ -147,7 +148,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tong thu',
+                        'Tổng thu',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(height: 6),
@@ -164,7 +165,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tong chi',
+                        'Tổng chi',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(height: 6),
@@ -181,7 +182,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Can doi',
+                        'Cân đối',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(height: 6),
@@ -338,7 +339,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Phan tich nguon/chi',
+                    'Phân tích nguồn thu/chi',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -362,7 +363,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ..sort((a, b) => b.value.compareTo(a.value));
 
                       if (topExpenseCats.isEmpty && topIncomeCats.isEmpty) {
-                        return const Text('Khong co du lieu de phan tich');
+                        return const Text('Không có dữ liệu để phân tích');
                       }
 
                       return Column(
@@ -370,7 +371,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         children: [
                           if (topExpenseCats.isNotEmpty) ...[
                             Text(
-                              'Top chi tieu',
+                              'Top chi tiêu',
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(height: 6),
@@ -382,7 +383,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(e.key),
+                                  Text(categoryDisplayName(e.key)),
                                   Text(
                                     '${currencyFormat.format(e.value)} • $pct%',
                                   ),
@@ -405,7 +406,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(e.key),
+                                  Text(categoryDisplayName(e.key)),
                                   Text(
                                     '${currencyFormat.format(e.value)} • $pct%',
                                   ),

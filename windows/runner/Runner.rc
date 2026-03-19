@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "qlchitieu" "\0"
+            VALUE "FileDescription", "G13Pal" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "qlchitieu" "\0"
+            VALUE "InternalName", "G13Pal" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "qlchitieu.exe" "\0"
-            VALUE "ProductName", "qlchitieu" "\0"
+            VALUE "OriginalFilename", "G13Pal.exe" "\0"
+            VALUE "ProductName", "G13Pal" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

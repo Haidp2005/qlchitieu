@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
+import '../data/spending_limit_provider.dart';
 import '../data/transaction_provider.dart';
+import '../domain/transaction_categories.dart';
 import '../domain/transaction_entry.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -26,6 +29,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TransactionProvider>();
+    final limitProvider = context.watch<SpendingLimitProvider>();
     final transactions = provider.transactions;
     final isLoading = provider.isLoading;
 
@@ -44,6 +48,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         .fold<double>(0, (sum, tx) => sum + tx.amount);
 
     final filtered = _applyFilter(transactions, _filter, _searchQuery);
+    unawaited(limitProvider.syncSpentFromTransactions(transactions));
+    final alerts = _buildLimitAlerts(limitProvider, DateTime.now());
 
     return SafeArea(
       child: isLoading
@@ -57,6 +63,35 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     children: [
                       Text('Giao dịch', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
+
+                      if (alerts.isNotEmpty)
+                        ...alerts.map(
+                          (alert) => Card(
+                            color: alert.isExceeded
+                                ? Colors.red.withValues(alpha: 0.08)
+                                : Colors.orange.withValues(alpha: 0.08),
+                            child: ListTile(
+                              leading: Icon(
+                                alert.isExceeded
+                                    ? Icons.warning_amber_rounded
+                                    : Icons.notifications_active,
+                                color: alert.isExceeded
+                                    ? Colors.red
+                                    : Colors.orange.shade800,
+                              ),
+                              title: Text(
+                                alert.isExceeded
+                                ? 'Đã vượt hạn mức ${categoryDisplayName(alert.category)}'
+                                : 'Sắp chạm hạn mức ${categoryDisplayName(alert.category)}',
+                              ),
+                              subtitle: Text(
+                                'Đã chi ${currencyFormat.format(alert.spent)} / ${currencyFormat.format(alert.limit)} (${(alert.progress * 100).toStringAsFixed(0)}%)',
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      if (alerts.isNotEmpty) const SizedBox(height: 8),
                       
                       // Thẻ Tổng Quan Thu/Chi
                       Card(
@@ -76,7 +111,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                   ],
                                 ),
                               ),
-                              Container(height: 40, width: 1, color: Colors.grey.withOpacity(0.3)),
+                              Container(height: 40, width: 1, color: Colors.grey.withValues(alpha: 0.3)),
                               Expanded(
                                 child: Column(
                                   children: [
@@ -175,6 +210,56 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     return result.toList();
   }
+
+  List<_LimitAlert> _buildLimitAlerts(
+    SpendingLimitProvider limitProvider,
+    DateTime month,
+  ) {
+    final yearMonth = DateFormat('yyyy-MM').format(month);
+    final monthLimits = limitProvider.getLimitsByMonth(yearMonth);
+    final alerts = <_LimitAlert>[];
+
+    for (final limit in monthLimits) {
+      if (!limit.isValid) continue;
+      final progress = limit.spentAmount / limit.limitAmount;
+      final warningThreshold = limit.warningPercent / 100;
+      if (progress >= warningThreshold) {
+        alerts.add(
+          _LimitAlert(
+            category: limit.category,
+            spent: limit.spentAmount,
+            limit: limit.limitAmount,
+            progress: progress,
+            warningPercent: limit.warningPercent,
+            yearMonth: limit.yearMonth,
+          ),
+        );
+      }
+    }
+
+    alerts.sort((a, b) => b.progress.compareTo(a.progress));
+    return alerts;
+  }
+}
+
+class _LimitAlert {
+  _LimitAlert({
+    required this.category,
+    required this.spent,
+    required this.limit,
+    required this.progress,
+    required this.warningPercent,
+    required this.yearMonth,
+  });
+
+  final String category;
+  final double spent;
+  final double limit;
+  final double progress;
+  final double warningPercent;
+  final String yearMonth;
+
+  bool get isExceeded => progress >= 1;
 }
 
 class _TransactionCard extends StatelessWidget {
@@ -237,7 +322,7 @@ class _TransactionCard extends StatelessWidget {
         elevation: 1,
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: isIncome ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+            backgroundColor: isIncome ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
             child: Icon(
               isIncome ? Icons.arrow_downward : Icons.arrow_upward,
               color: isIncome ? Colors.green : Colors.red,
@@ -245,7 +330,7 @@ class _TransactionCard extends StatelessWidget {
           ),
           title: Text(entry.title, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-            '${entry.category} • ${DateFormat('dd/MM/yyyy').format(entry.date)}',
+            '${categoryDisplayName(entry.category)} • ${DateFormat('dd/MM/yyyy').format(entry.date)}',
           ),
           trailing: Text(
             '${isIncome ? '+' : '-'}${currencyFormat.format(entry.amount)}',

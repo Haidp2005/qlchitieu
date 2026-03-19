@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../domain/auth_provider.dart';
 
@@ -22,13 +23,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() async {
-    setState(() => _isLoading = true);
-    await context.read<AuthProvider>().login(
-      _emailController.text,
-      _passwordController.text,
-    );
-    if (mounted) {
-      setState(() => _isLoading = false);
+    try {
+      setState(() => _isLoading = true);
+      await context.read<AuthProvider>().login(
+        _emailController.text,
+        _passwordController.text,
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -128,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
-                      // Navigate to Register
+                      context.go('/register');
                     },
                     child: const Text('Chưa có tài khoản? Đăng ký ngay'),
                   ),

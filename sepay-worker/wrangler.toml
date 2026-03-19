@@ -1,0 +1,9 @@
+name = "sepay-webhook-firestore"
+main = "src/index.js"
+compatibility_date = "2025-03-19"
+
+[vars]
+FIREBASE_PROJECT_ID = "quanlychitieu-2e7f1"
+FIRESTORE_COLLECTION = "transactions"
+DEFAULT_CATEGORY = "Khac"
+FIREBASE_WEB_API_KEY = "AIzaSyC909gcod6XTOIjAwZEmGmXYrei6cE7gyo"

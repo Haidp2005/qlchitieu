@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{docId} {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasAll([
+          'email',
+          'password',
+          'phone',
+          'fullName',
+          'openingAssets',
+          'currentAssets'
+        ]) &&
+        request.resource.data.email is string &&
+        request.resource.data.password is string &&
+        request.resource.data.phone is string &&
+        request.resource.data.fullName is string &&
+        request.resource.data.openingAssets is number &&
+        request.resource.data.currentAssets is number &&
+        (!request.resource.data.keys().hasAny(['avatarUrl']) ||
+            request.resource.data.avatarUrl is string);
+
+      allow delete: if false;
+    }
+
+    match /transactions/{docId} {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasAll([
+          'title',
+          'amount',
+          'category',
+          'type',
+          'source',
+          'transactionTime'
+        ]) &&
+        request.resource.data.title is string &&
+        request.resource.data.category is string &&
+        request.resource.data.amount is number &&
+        request.resource.data.type in ['income', 'expense'] &&
+        request.resource.data.source in ['manual', 'sepay'] &&
+        request.resource.data.transactionTime is timestamp;
+
+      allow delete: if true;
+    }
+
+    match /monthly_category_limits/{docId} {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasAll([
+          'userId',
+          'yearMonth',
+          'category',
+          'limitAmount'
+        ]) &&
+        request.resource.data.userId is string &&
+        request.resource.data.yearMonth is string &&
+        request.resource.data.category is string &&
+        request.resource.data.limitAmount is number &&
+        (!request.resource.data.keys().hasAny(['warningPercent']) ||
+            request.resource.data.warningPercent is number) &&
+        (!request.resource.data.keys().hasAny(['spentAmount']) ||
+            request.resource.data.spentAmount is number) &&
+        (!request.resource.data.keys().hasAny(['createdAt']) ||
+            request.resource.data.createdAt is timestamp) &&
+        (!request.resource.data.keys().hasAny(['updatedAt']) ||
+            request.resource.data.updatedAt is timestamp);
+
+      allow delete: if true;
+    }
+  }
+}
